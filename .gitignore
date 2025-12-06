@@ -1,0 +1,28 @@
+# Entornos virtuales
+venv/
+env/
+ENV/
+
+# Archivos de Django
+__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite3
+*.sqlite3-journal
+db.sqlite3
+db.sqlite3-journal
+
+# Carpetas de archivos subidos
+media/
+staticfiles/
+
+# VS Code y PyCharm
+.vscode/
+.idea/
+*.code-workspace
+
+# Logs y otros
+*.log
+.env
+.local
+.coverage
