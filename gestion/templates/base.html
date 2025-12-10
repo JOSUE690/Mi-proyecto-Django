@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Biblioteca Josué{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+        }
+        .navbar { 
+            background: rgba(0,0,0,0.9) !important; 
+            backdrop-filter: blur(10px);
+        }
+        .nav-link { color: white !important; font-weight: 500; }
+        .nav-link:hover, .nav-link.active { color: #00ff88 !important; }
+        .hero { 
+            background: url('https://images.unsplash.com/photo-1481627834876-b7833e8f5570') center/cover;
+            height: 50vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            color: white;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.8);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Menú personalizado -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">Biblioteca Josué</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="menu">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Libros</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Autores</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Préstamos</a></li>
+                    <li class="nav-item"><a class="nav-link text-warning" href="#">Multas</a></li>
+                    <li class="nav-item"><a class="nav-link text-info" href="/admin/">Admin</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Cabecera llamativa -->
+    <div class="hero text-center">
+        <div>
+            <h1 class="display-3 fw-bold">Sistema de Biblioteca</h1>
+            <p class="lead">Gestión completa y elegante</p>
+        </div>
+    </div>
+
+    <!-- Contenido de cada página -->
+    <div class="container mt-5 pt-4">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

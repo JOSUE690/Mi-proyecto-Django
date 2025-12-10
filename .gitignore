@@ -1,28 +1,27 @@
 # Entornos virtuales
 venv/
+.venv/
+virtualenv
+virtuallenv
 env/
 ENV/
 
-# Archivos de Django
+# Django
+*.pyc
 __pycache__/
-*.py[cod]
-*$py.class
-*.sqlite3
-*.sqlite3-journal
 db.sqlite3
-db.sqlite3-journal
-
-# Carpetas de archivos subidos
-media/
-staticfiles/
-
-# VS Code y PyCharm
-.vscode/
-.idea/
-*.code-workspace
-
-# Logs y otros
+*.sqlite3
 *.log
-.env
-.local
-.coverage
+local_settings.py
+.DS_Store
+
+# Media y archivos subidos
+media/
+
+# Migrations si no las quieres versionar (opcional, yo sí las subo)
+# migrations/
+
+# Otros
+*.env
+*.idea/
+*.vscode/
