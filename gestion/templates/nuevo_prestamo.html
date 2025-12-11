@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Registrar Nuevo Préstamo{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h3 class="mb-4 text-danger"><i class="bi bi-plus-circle-fill me-2"></i> Registrar Nuevo Préstamo</h3>
+        <p class="lead text-secondary">Complete los datos para iniciar una nueva transacción.</p>
+
+        <div class="card p-4 mt-4" style="background-color: #1E1E1E; border: 1px solid rgba(255, 0, 0, 0.4); border-radius: 8px;">
+            
+            <form method="POST" action="{% url 'gestion:nuevo_prestamo' %}">
+                {% csrf_token %} 
+                
+                <div class="mb-3">
+                    <label for="libro" class="form-label text-light">Libro a Prestar</label>
+                    <select name="libro" id="libro" class="form-control form-control-dark" required>
+                        <option value="">-- Seleccionar Libro --</option>
+                        {% for libro in libros %}
+                            <option value="{{ libro.pk }}">{{ libro.titulo }} (Copias: {{ libro.copias_disponibles }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="lector" class="form-label text-light">Lector</label>
+                    <select name="lector" id="lector" class="form-control form-control-dark" required>
+                        <option value="">-- Seleccionar Lector --</option>
+                        {% for lector in lectores %}
+                            <option value="{{ lector.pk }}">{{ lector.nombre }} ({{ lector.identificacion }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="fecha_devolucion" class="form-label text-light">Fecha de Devolución Esperada</label>
+                    <input type="date" name="fecha_devolucion" id="fecha_devolucion" class="form-control form-control-dark" required>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="submit" class="btn btn-futuristic-danger">
+                        <i class="bi bi-send-fill me-2"></i> Registrar Préstamo
+                    </button>
+                    <a href="{% url 'gestion:prestamos' %}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control-dark {
+        background-color: #2b2b2b;
+        color: #00FF88;
+        border: 1px solid rgba(255, 0, 0, 0.2);
+    }
+    .form-control-dark:focus {
+        background-color: #333;
+        color: #00FF88;
+        box-shadow: 0 0 0 0.25rem rgba(255, 0, 0, 0.25);
+        border-color: #FF0055;
+    }
+    .btn-futuristic-danger {
+        background: linear-gradient(45deg, #FF0055, #FF0000);
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        transition: transform 0.2s;
+    }
+    .btn-futuristic-danger:hover {
+        transform: scale(1.05);
+        background: linear-gradient(45deg, #FF3377, #FF3333);
+    }
+</style>
+
+{% endblock %}

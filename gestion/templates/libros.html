@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Catálogo de Recursos{% endblock %}
+
+{% block content %}
+    <h3 class="mb-4 text-neon"><i class="bi bi-bookshelf me-2"></i> Catálogo de Recursos</h3>
+    <p class="lead text-secondary">Inventario de títulos y autores registrados en el sistema, cargado en tiempo real.</p>
+    
+    <div class="table-responsive mt-4">
+        {% if libros %}
+            <table class="table table-dark table-hover mb-0" style="--bs-table-hover-bg: #343434;">
+                <thead style="background-color: #333; border-bottom: 2px solid #00FF88;">
+                    <tr>
+                        <th scope="col" class="fw-bold text-neon">Título</th>
+                        <th scope="col" class="fw-bold text-neon">Autor</th>
+                        <th scope="col" class="text-center fw-bold text-neon">Publicación</th>
+                        <th scope="col" class="text-center fw-bold text-neon">Unidades</th>
+                        <th scope="col" class="fw-bold text-neon">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for libro in libros %}
+                    <tr>
+                        <td>{{ libro.titulo }}</td>
+                        <td class="text-secondary">
+                            <i class="bi bi-person me-2 text-neon"></i>
+                            {{ libro.autor.nombre_completo }}
+                        </td>
+                        <td class="text-center text-muted">{{ libro.publicacion|default:"N/A" }}</td>
+                        <td class="text-center">
+                            <span class="badge rounded-pill bg-success text-dark">{{ libro.copias_disponibles }}</span>
+                        </td>
+                        <td>
+                            <a href="{% url 'gestion:detalle_libro' pk=libro.pk %}" class="btn btn-sm btn-outline-success rounded-pill text-neon">
+                                Ver Detalle
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="alert alert-dark mt-4 border border-success text-neon">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                No hay libros registrados. Por favor, agregue datos desde el panel de administración.
+            </div>
+        {% endif %}
+    </div>
+
+{% endblock %}

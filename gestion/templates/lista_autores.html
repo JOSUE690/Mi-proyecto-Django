@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Registro de Autores{% endblock %}
+
+{% block content %}
+    <h3 class="mb-4 text-neon"><i class="bi bi-people-fill me-2"></i> Registro de Autores</h3>
+    <p class="lead text-secondary">Listado completo de autores registrados en el sistema.</p>
+    
+    <div class="table-responsive mt-4">
+        {% if autores %}
+            <table class="table table-dark table-hover mb-0" style="--bs-table-hover-bg: #343434;">
+                <thead style="background-color: #333; border-bottom: 2px solid #00FF88;">
+                    <tr>
+                        <th scope="col" class="fw-bold text-neon">ID</th>
+                        <th scope="col" class="fw-bold text-neon">Nombre Completo</th>
+                        <th scope="col" class="text-center fw-bold text-neon">Libros Registrados</th>
+                        <th scope="col" class="fw-bold text-neon">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for autor in autores %}
+                    <tr>
+                        <td class="text-muted">{{ autor.pk }}</td>
+                        <td>
+                            <i class="bi bi-person-badge-fill me-2 text-info"></i>
+                            {{ autor.nombre_completo }}
+                        </td>
+                        <td class="text-center">
+                            <span class="badge rounded-pill bg-warning text-dark">{{ autor.libro_set.count }}</span>
+                        </td>
+                        <td>
+                            <a href="#" class="btn btn-sm btn-outline-info rounded-pill text-info disabled">
+                                Ver Detalle
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="alert alert-dark mt-4 border border-info text-info">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                No hay autores registrados. Utilice el panel de administración para agregarlos.
+            </div>
+        {% endif %}
+    </div>
+
+{% endblock %}

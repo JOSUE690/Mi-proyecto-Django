@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Control de Préstamos{% endblock %}
+
+{% block content %}
+    <h3 class="mb-4 text-danger"><i class="bi bi-arrow-down-up me-2"></i> Control de Préstamos</h3>
+    <p class="lead text-secondary">Gestión de transacciones activas y registro histórico.</p>
+
+    <a href="{% url 'gestion:nuevo_prestamo' %}" class="btn btn-futuristic-danger mb-4">
+        <i class="bi bi-plus-circle me-2"></i> Registrar Nuevo Préstamo
+    </a>
+
+    <ul class="nav nav-tabs nav-tabs-futuristic mb-4" id="prestamoTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="activos-tab" data-bs-toggle="tab" data-bs-target="#activos" type="button" role="tab" aria-controls="activos" aria-selected="true">
+                Activos ({{ prestamos_activos|length }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="historicos-tab" data-bs-toggle="tab" data-bs-target="#historicos" type="button" role="tab" aria-controls="historicos" aria-selected="false">
+                Histórico ({{ prestamos_historicos|length }})
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="prestamoTabsContent">
+        <div class="tab-pane fade show active" id="activos" role="tabpanel" aria-labelledby="activos-tab">
+            <h4 class="text-light border-bottom border-danger pb-2">Préstamos Pendientes de Devolución</h4>
+            
+            {% if prestamos_activos %}
+            <div class="table-responsive mt-3">
+                <table class="table table-dark table-hover mb-0" style="--bs-table-hover-bg: #402626;">
+                    <thead style="background-color: #333; border-bottom: 2px solid #FF0055;">
+                        <tr>
+                            <th scope="col" class="fw-bold text-danger">Libro</th>
+                            <th scope="col" class="fw-bold text-danger">Lector</th>
+                            <th scope="col" class="text-center fw-bold text-danger">Fecha Préstamo</th>
+                            <th scope="col" class="text-center fw-bold text-danger">Devolución Esperada</th>
+                            <th scope="col" class="fw-bold text-danger">Estado</th>
+                            <th scope="col" class="fw-bold text-danger">Acciones</th> </tr>
+                    </thead>
+                    <tbody>
+                        {% for prestamo in prestamos_activos %}
+                        <tr class="{% if prestamo.fecha_devolucion_esperada < now %}table-danger-light{% endif %}">
+                            <td><a href="{% url 'gestion:detalle_libro' pk=prestamo.libro.pk %}" class="text-neon-link">{{ prestamo.libro.titulo }}</a></td>
+                            <td class="text-info">{{ prestamo.lector.nombre }}</td>
+                            <td class="text-center text-secondary">{{ prestamo.fecha_prestamo }}</td>
+                            <td class="text-center">
+                                <span class="badge rounded-pill bg-{% if prestamo.fecha_devolucion_esperada < now %}danger{% else %}warning{% endif %} text-dark">
+                                    {{ prestamo.fecha_devolucion_esperada }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-danger">ACTIVO</span>
+                            </td>
+                            <td> <a href="{% url 'gestion:devolver_prestamo' pk=prestamo.pk %}" class="btn btn-sm btn-success rounded-pill">
+                                    <i class="bi bi-arrow-return-left"></i> Devolver
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-dark mt-4 border border-danger text-danger">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                No hay préstamos activos pendientes de devolución.
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="tab-pane fade" id="historicos" role="tabpanel" aria-labelledby="historicos-tab">
+            <h4 class="text-light border-bottom border-secondary pb-2">Registro de Préstamos Finalizados</h4>
+
+            {% if prestamos_historicos %}
+            <div class="table-responsive mt-3">
+                <table class="table table-dark table-hover mb-0" style="--bs-table-hover-bg: #222;">
+                    <thead style="background-color: #333; border-bottom: 2px solid #888;">
+                        <tr>
+                            <th scope="col" class="fw-bold text-secondary">Libro</th>
+                            <th scope="col" class="fw-bold text-secondary">Lector</th>
+                            <th scope="col" class="text-center fw-bold text-secondary">Fecha Préstamo</th>
+                            <th scope="col" class="fw-bold text-secondary">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prestamo in prestamos_historicos %}
+                        <tr>
+                            <td>{{ prestamo.libro.titulo }}</td>
+                            <td class="text-muted">{{ prestamo.lector.nombre }}</td>
+                            <td class="text-center text-muted">{{ prestamo.fecha_prestamo }}</td>
+                            <td>
+                                <span class="badge bg-success">DEVUELTO</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-dark mt-4 border border-secondary text-secondary">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                No hay registros históricos de préstamos devueltos.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <style>
+        .btn-futuristic-danger {
+            background: linear-gradient(45deg, #FF0055, #FF0000);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: transform 0.2s;
+        }
+        .btn-futuristic-danger:hover {
+            transform: scale(1.05);
+            background: linear-gradient(45deg, #FF3377, #FF3333);
+        }
+    </style>
+{% endblock %}

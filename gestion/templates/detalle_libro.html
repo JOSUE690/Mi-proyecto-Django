@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Detalle de: {{ libro.titulo }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="text-neon border-bottom border-neon pb-2">{{ libro.titulo }}</h2>
+            
+            <a href="{% url 'gestion:libros' %}" class="btn btn-sm btn-outline-secondary rounded-pill text-light">
+                <i class="bi bi-arrow-left me-2"></i> Volver al Catálogo
+            </a>
+        </div>
+        
+        <p class="lead text-secondary">Informacion:.</p>
+
+        <div class="card p-4 mt-4" style="background-color: #1E1E1E; border: 1px solid rgba(0, 255, 136, 0.3); border-radius: 8px;">
+            <div class="row">
+                
+                <div class="col-12 mb-3">
+                    <h5 class="text-neon"><i class="bi bi-person-fill me-2"></i> Autor</h5>
+                    <p class="fs-4 text-light">{{ libro.autor.nombre_completo }}</p>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <h5 class="text-neon"><i class="bi bi-calendar-fill me-2"></i> Año de Publicación</h5>
+                    <p class="fs-5 text-secondary">{{ libro.publicacion|default:"No registrado" }}</p>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <h5 class="text-neon"><i class="bi bi-hash me-2"></i> ID del Recurso (PK)</h5>
+                    <p class="fs-5 text-secondary">{{ libro.pk }}</p>
+                </div>
+
+                <div class="col-12 mt-3 pt-3 border-top border-secondary">
+                    <h5 class="text-neon"><i class="bi bi-stack me-2"></i> Gestión de Copias</h5>
+                    <p class="fs-5 text-light">
+                        Copias disponibles: 
+                        <span class="badge rounded-pill bg-success text-dark ms-2">{{ libro.copias_disponibles }}</span>
+                    </p>
+                    <p class="text-muted small">
+                        *Este número se actualiza con cada préstamo y devolución.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-5">
+            <button class="btn btn-futuristic btn-lg me-3">
+                <i class="bi bi-arrow-down-up me-2"></i> Iniciar Préstamo
+            </button>
+            <button class="btn btn-outline-danger btn-lg text-danger">
+                <i class="bi bi-trash-fill me-2"></i> Eliminar Libro
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
