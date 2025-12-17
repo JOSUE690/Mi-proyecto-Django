@@ -1,36 +1,30 @@
 from django.db import models
-from django.utils import timezone # Necesario para la fecha de préstamo
+from django.utils import timezone
+from django.contrib.auth.models import User # <--- ¡Nueva importación crucial!
 
 # ----------------------------------------------------
-# 1. MODELO AUTOR (Pequeñas mejoras para detalle)
+# 1. MODELO AUTOR
 # ----------------------------------------------------
 class Autor(models.Model):
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
-    # Campos adicionales para enriquecer el detalle
     fecha_nacimiento = models.DateField(null=True, blank=True)
     nacionalidad = models.CharField(max_length=50, blank=True)
 
-    # Método para obtener el nombre completo (usando @property para acceso más limpio)
     @property
     def nombre_completo(self):
-        # Esto imita la "concatenación" de SQL que mencionaste
         return f"{self.nombre} {self.apellido}"
 
     def __str__(self):
         return self.nombre_completo
 
 # ----------------------------------------------------
-# 2. MODELO LIBRO (Ajustado a PositiveIntegerField)
+# 2. MODELO LIBRO
 # ----------------------------------------------------
 class Libro(models.Model):
     titulo = models.CharField(max_length=200)
-    # Una clave foránea que enlaza cada libro a un autor
     autor = models.ForeignKey(Autor, on_delete=models.CASCADE)
-    # Campo para registrar el año de publicación (opcional)
     publicacion = models.IntegerField(null=True, blank=True)
-    
-    # Usamos PositiveIntegerField para asegurar que las copias no sean negativas
     copias_disponibles = models.PositiveIntegerField(default=0) 
 
     def __str__(self):
@@ -40,43 +34,38 @@ class Libro(models.Model):
         verbose_name_plural = "Libros"
 
 # ----------------------------------------------------
-# 3. MODELO LECTOR (Nuevo)
+# 3. MODELO LECTOR (ACTUALIZADO PARA AUTENTICACIÓN)
 # ----------------------------------------------------
 class Lector(models.Model):
-    # Nombre completo de la persona
-    nombre = models.CharField(max_length=150)
-    # Identificador único (ej: DNI, ID de estudiante)
+    # Clave primaria vinculada al usuario de Django Auth (user es el nombre estándar)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True) 
+    
+    # Quitamos 'nombre' y 'email' porque vienen del modelo User.
     identificacion = models.CharField(max_length=20, unique=True)
-    email = models.EmailField(blank=True, null=True)
+    telefono = models.CharField(max_length=15, blank=True, null=True) 
 
     def __str__(self):
-        # Muestra el nombre y la identificación del lector
-        return f"{self.nombre} ({self.identificacion})"
+        return f"{self.user.username} ({self.identificacion})"
 
     class Meta:
-        verbose_name_plural = "Lectores"
+        verbose_name = "Usuario"          
+        verbose_name_plural = "Usuarios"
 
 # ----------------------------------------------------
-# 4. MODELO PRÉSTAMO (Nuevo)
+# 4. MODELO PRÉSTAMO
 # ----------------------------------------------------
 class Prestamo(models.Model):
-    # Relación con el libro que se prestó
     libro = models.ForeignKey(Libro, on_delete=models.CASCADE)
-    
-    # Relación con la persona a la que se prestó
     lector = models.ForeignKey(Lector, on_delete=models.CASCADE)
     
-    # Fechas de la transacción
     fecha_prestamo = models.DateField(default=timezone.now)
     fecha_devolucion_esperada = models.DateField()
     
-    # Estado del préstamo: True=Devuelto, False=Activo/Pendiente
     devuelto = models.BooleanField(default=False) 
 
     def __str__(self):
-        return f"Préstamo de {self.libro.titulo} a {self.lector.nombre}"
+        return f"Préstamo de {self.libro.titulo} a {self.lector.user.username}"
 
     class Meta:
         verbose_name_plural = "Préstamos"
-        # Ordenamos los préstamos: primero los no devueltos, luego por fecha de préstamo descendente
         ordering = ['devuelto', '-fecha_prestamo']

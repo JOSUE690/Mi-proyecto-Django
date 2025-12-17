@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Registro de Usuario{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <h3 class="text-info mb-4"><i class="bi bi-person-plus-fill me-2"></i> Registro de Nuevo Usuario (Con Contraseña)</h3>
+        <p class="lead text-secondary">Utilice este formulario para crear una cuenta que pueda iniciar sesión (Usuario Auth) y el perfil de Lector asociado.</p>
+
+        <div class="card bg-dark p-4 border border-info">
+            <form method="post">
+                {% csrf_token %}
+                
+                {% for field in form %}
+                <div class="mb-3">
+                    <label for="{{ field.id_for_label }}" class="form-label text-light">{{ field.label }}</label>
+                    
+                    {{ field }} 
+                    
+                    {% if field.errors %}
+                        <div class="text-danger small">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                
+                <button type="submit" class="btn btn-info w-100 mt-4 fw-bold text-dark">
+                    <i class="bi bi-save me-2"></i> Crear Usuario con Contraseña
+                </button>
+            </form>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}

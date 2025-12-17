@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Lectores Registrados{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>📚 Listado de Usuarios Lectores</h2>
+
+    <a href="{% url 'gestion:registro_usuario' %}" class="btn btn-success mb-3">
+        + Registrar Nuevo Usuario (Con Contraseña)
+    </a>
+
+    {% if lectores %}
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Usuario</th>
+                <th>Email</th>
+                <th>Identificación</th>
+                <th>Teléfono</th>
+                <th>Registro</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for lector in lectores %}
+            <tr>
+                <td>{{ lector.user.username }}</td>
+                <td>{{ lector.user.email }}</td>
+                <td>{{ lector.identificacion }}</td>
+                <td>{{ lector.telefono|default:"N/A" }}</td>
+                <td>{{ lector.user.date_joined|date:"d M Y" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="alert alert-warning">
+        Aún no hay lectores registrados en el sistema.
+    </div>
+    {% endif %}
+
+    <a href="{% url 'gestion:registro_lector' %}" class="btn btn-secondary mt-3">
+        Registrar Lector (Sin Contraseña)
+    </a>
+
+</div>
+{% endblock %}
