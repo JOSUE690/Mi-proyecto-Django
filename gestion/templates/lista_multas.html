@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-neon mb-4">
+        <i class="bi bi-cash-stack me-2"></i>Reporte de Multas
+    </h2>
+    
+    <div class="table-responsive">
+        <table class="table table-dark table-hover border-neon">
+            <thead class="text-neon">
+                <tr>
+                    <th>Usuario</th>
+                    <th>Libro</th>
+                    <th>Monto</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody class="text-light">
+                {% for multa in multas %}
+                <tr>
+                    <td>{{ multa.prestamo.lector.user.username }}</td>
+                    <td>{{ multa.prestamo.libro.titulo }}</td>
+                    <td class="fw-bold text-danger">${{ multa.monto }}</td>
+                    <td>
+                        {% if multa.pagada %}
+                            <span class="badge bg-success text-dark">Pagada</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Pendiente</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted">No tienes multas registradas en el sistema.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="mt-4">
+        <a href="{% url 'gestion:inicio' %}" class="btn btn-outline-light">
+            <i class="bi bi-arrow-left me-2"></i>Volver al Inicio
+        </a>
+    </div>
+</div>
+
+<style>
+    /* Estilo extra para que la tabla combine con tu base.html */
+    .border-neon {
+        border: 1px solid rgba(0, 255, 136, 0.3) !important;
+    }
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 255, 136, 0.05);
+    }
+</style>
+{% endblock %}

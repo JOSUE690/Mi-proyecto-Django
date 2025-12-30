@@ -1,229 +1,127 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Libro, Autor, Prestamo, Lector # Asegúrate que Lector esté bien definido en models.py
-from django.db.models import Sum, Q 
+from .models import Libro, Autor, Prestamo, Lector, Multa
+from django.db.models import Sum, Q, Avg, Max, Min, Count
 from django.utils import timezone
 from datetime import datetime
-from .forms import UsuarioForm # <--- ¡IMPORTACIÓN CLAVE! Necesaria para el nuevo registro
+from .forms import UsuarioForm
 
+# --- FUNCIÓN CENTRAL: DETECTA VENCIDOS ---
+def actualizar_multas_vencidas():
+    hoy = timezone.now().date()
+    # Buscamos préstamos no devueltos que ya pasaron la fecha
+    prestamos_vencidos = Prestamo.objects.filter(
+        devuelto=False, 
+        fecha_devolucion_esperada__lt=hoy
+    )
+    
+    for prestamo in prestamos_vencidos:
+        dias_retraso = (hoy - prestamo.fecha_devolucion_esperada).days
+        monto_total = dias_retraso * 0.50
+        
+        multa, created = Multa.objects.get_or_create(prestamo=prestamo)
+        if not multa.pagada:
+            multa.monto = monto_total
+            multa.save()
 
-# 1. VISTA: Dashboard (Página de inicio)
 def index(request):
-    # Obtener métricas para el Dashboard
+    actualizar_multas_vencidas()
     total_libros = Libro.objects.count()
     total_autores = Autor.objects.count()
-    
-    total_copias_qs = Libro.objects.aggregate(Sum('copias_disponibles'))
-    total_copias = total_copias_qs.get('copias_disponibles__sum') or 0
+    total_copias = Libro.objects.aggregate(Sum('copias_disponibles'))['copias_disponibles__sum'] or 0
+    # Solo sumamos multas pendientes de pago
+    total_multas_valor = Multa.objects.filter(pagada=False).aggregate(Sum('monto'))['monto__sum'] or 0
     
     context = {
         'total_libros': total_libros,
         'total_autores': total_autores,
         'total_copias': total_copias,
+        'total_multas_valor': total_multas_valor,
     }
-    
     return render(request, 'inicio.html', context)
 
-
-# MÓDULO LIBROS Y AUTORES
-
-# 2. VISTA: Listado de Libros (Catálogo de Recursos) con BÚSQUEDA
 def lista_libros(request):
     libros = Libro.objects.all().select_related('autor').order_by('titulo')
-    query = None 
+    query = request.GET.get('q') 
+    if query:
+        libros = libros.filter(Q(titulo__icontains=query) | Q(autor__nombre__icontains=query) | Q(autor__apellido__icontains=query)).distinct()
+    return render(request, 'libros.html', {'libros': libros, 'query': query})
 
-    # LÓGICA DE BÚSQUEDA
-    if 'q' in request.GET:
-        query = request.GET.get('q') 
-
-        if query:
-            # Búsqueda en Título, Nombre del Autor O Apellido del Autor
-            libros = libros.filter(
-                Q(titulo__icontains=query) |
-                Q(autor__nombre__icontains=query) |
-                Q(autor__apellido__icontains=query)
-            ).distinct()
-            
-    context = {
-        'libros': libros,
-        'query': query, 
-    }
-    
-    return render(request, 'libros.html', context)
-
-
-# 3. VISTA: Detalle de un Libro
 def detalle_libro(request, pk):
     libro = get_object_or_404(Libro, pk=pk)
+    return render(request, 'detalle_libro.html', {'libro': libro})
     
-    context = {
-        'libro': libro,
-    }
-    
-    return render(request, 'detalle_libro.html', context)
-    
-    
-# 4. VISTA: Listado de Autores
 def lista_autores(request):
     autores = Autor.objects.all().order_by('nombre').prefetch_related('libro_set')
-    
-    context = {
-        'autores': autores
-    }
-    
-    return render(request, 'lista_autores.html', context)
+    return render(request, 'lista_autores.html', {'autores': autores})
 
-
-# MÓDULO LECTORES (USUARIOS)
-
-# 5. VISTA: Registro de Nuevo Lector (Registro simple sin contraseña)
 def registro_lector(request):
     if request.method == 'POST':
-        # NOTA: Esta vista ya no es compatible si Lector en models.py usa OneToOneField con User.
-        # Si Lector usa OneToOneField, esta vista debe ser actualizada o eliminada.
-        nombre = request.POST.get('nombre')
-        identificacion = request.POST.get('identificacion') 
-        email = request.POST.get('email')
-        telefono = request.POST.get('telefono')
-        
+        nombre, identificacion = request.POST.get('nombre'), request.POST.get('identificacion')
+        email, telefono = request.POST.get('email'), request.POST.get('telefono')
         try:
-            # Si Lector ya está vinculado a User, esta línea causará un error
-            Lector.objects.create(
-                nombre=nombre,
-                identificacion=identificacion,
-                email=email,
-                telefono=telefono,
-            )
-            return redirect('gestion:lectores') 
-
-        except Exception as e:
-            print(f"Error al registrar lector: {e}") 
-            return redirect('gestion:registro_lector') 
-            
+            Lector.objects.create(nombre=nombre, identificacion=identificacion, email=email, telefono=telefono)
+            return redirect('gestion:lectores')
+        except: return redirect('gestion:registro_lector')
     return render(request, 'registro_lector.html')
 
-
-# NUEVA FUNCIÓN: 5.1 VISTA: Registro de Nuevo Usuario (CON CONTRASEÑA y Django Auth)
 def registro_usuario(request):
     if request.method == 'POST':
-        # Utilizamos el nuevo formulario que maneja contraseña
-        form = UsuarioForm(request.POST) 
+        form = UsuarioForm(request.POST)
         if form.is_valid():
-            # form.save() llama a la lógica en forms.py que crea el User y el Lector asociado
-            user = form.save() 
-            return redirect('gestion:lectores') 
-    else:
-        form = UsuarioForm()
-        
-    context = {
-        'form': form,
-        'titulo': "Registro de Nuevo Usuario (Con Contraseña)"
-    }
-    # Renderiza la nueva plantilla HTML para el registro con contraseña
-    return render(request, 'registro_usuario.html', context)
+            form.save()
+            return redirect('gestion:lectores')
+    else: form = UsuarioForm()
+    return render(request, 'registro_usuario.html', {'form': form, 'titulo': "Registro de Nuevo Usuario"})
 
-
-# 6. VISTA: Listado de Lectores (Usuarios)
 def lista_lectores(request):
-    # NOTA: Si Lector usa OneToOneField, esta vista debe ser actualizada para usar el campo 'user'
-    # para obtener el nombre (lector.user.username) en la plantilla.
-    lectores = Lector.objects.all().order_by('identificacion') # Ordenar por identificación o username
-    
-    context = {
-        'lectores': lectores
-    }
-    
-    return render(request, 'lista_lectores.html', context)
+    lectores = Lector.objects.all().order_by('identificacion')
+    return render(request, 'lista_lectores.html', {'lectores': lectores})
 
-
-# MÓDULO PRÉSTAMOS
-
-# 7. VISTA: Listado de Préstamos (Con Lógica de Pestañas y BÚSQUEDA)
 def lista_prestamos(request):
-    # Consulta base para todos los préstamos
     prestamos = Prestamo.objects.all().select_related('libro', 'lector')
-    query = None # Inicializar la variable de búsqueda
-
-    # LÓGICA DE BÚSQUEDA
-    if 'q' in request.GET:
-        query = request.GET.get('q')
-        
-        if query:
-            # Filtramos en Título de Libro, Nombre de Lector O Identificación de Lector
-            # NOTA: Si Lector está vinculado a User, tendrás que filtrar por lector__user__username
-            filtro_busqueda = Q(libro__titulo__icontains=query) | \
-                             Q(lector__identificacion__icontains=query)
-                             
-            prestamos = prestamos.filter(filtro_busqueda).distinct()
-
-
-    # Préstamos Activos (devuelto=False)
-    prestamos_activos = prestamos.filter(devuelto=False).order_by('fecha_devolucion_esperada')
-    
-    # Préstamos Históricos (devuelto=True)
-    prestamos_historicos = prestamos.filter(devuelto=True).order_by('-fecha_prestamo')
-
+    query = request.GET.get('q')
+    if query:
+        prestamos = prestamos.filter(Q(libro__titulo__icontains=query) | Q(lector__identificacion__icontains=query)).distinct()
     context = {
-        'prestamos_activos': prestamos_activos,
-        'prestamos_historicos': prestamos_historicos,
+        'prestamos_activos': prestamos.filter(devuelto=False).order_by('fecha_devolucion_esperada'),
+        'prestamos_historicos': prestamos.filter(devuelto=True).order_by('-fecha_prestamo'),
         'now': timezone.now().date(),
-        'query': query, # Pasamos el término de búsqueda a la plantilla
+        'query': query,
     }
-    
     return render(request, 'lista_prestamos.html', context)
 
-
-# 8. VISTA: Para Crear un Nuevo Préstamo
 def nuevo_prestamo(request):
     if request.method == 'POST':
-        libro_id = request.POST.get('libro')
-        lector_id = request.POST.get('lector')
-        fecha_str = request.POST.get('fecha_devolucion') 
-        
+        libro_id, lector_id, fecha_str = request.POST.get('libro'), request.POST.get('lector'), request.POST.get('fecha_devolucion')
         try:
-            fecha_devolucion_esperada = datetime.strptime(fecha_str, '%Y-%m-%d').date()
-            libro = Libro.objects.get(pk=libro_id)
-            # NOTA: Si Lector usa OneToOneField, lector_id ya no es el ID de la fila, sino el ID del User.
-            lector = Lector.objects.get(pk=lector_id)
-            
+            fecha_esp = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+            libro, lector = Libro.objects.get(pk=libro_id), Lector.objects.get(pk=lector_id)
             if libro.copias_disponibles > 0:
-                Prestamo.objects.create(
-                    libro=libro,
-                    lector=lector,
-                    fecha_devolucion_esperada=fecha_devolucion_esperada,
-                    devuelto=False
-                )
-
+                Prestamo.objects.create(libro=libro, lector=lector, fecha_devolucion_esperada=fecha_esp, devuelto=False)
                 libro.copias_disponibles -= 1
                 libro.save()
-
                 return redirect('gestion:prestamos')
-            else:
-                pass 
-                
-        except (Libro.DoesNotExist, Lector.DoesNotExist, ValueError):
-            pass
-            
-    libros = Libro.objects.filter(copias_disponibles__gt=0).order_by('titulo')
-    lectores = Lector.objects.all().order_by('user__username') # Ordenar por el nombre de usuario de Django
-    
-    context = {
-        'libros': libros,
-        'lectores': lectores
-    }
-    
-    return render(request, 'nuevo_prestamo.html', context)
+        except: pass
+    return render(request, 'nuevo_prestamo.html', {'libros': Libro.objects.filter(copias_disponibles__gt=0), 'lectores': Lector.objects.all()})
 
-
-# 9. VISTA: Para Registrar la Devolución de un Préstamo
 def devolver_prestamo(request, pk):
     prestamo = get_object_or_404(Prestamo, pk=pk)
-    
     if not prestamo.devuelto:
+        actualizar_multas_vencidas()
+        # Marcamos multa como pagada al recibir el libro
+        Multa.objects.filter(prestamo=prestamo).update(pagada=True)
         prestamo.devuelto = True
         prestamo.save()
-        
         libro = prestamo.libro
         libro.copias_disponibles += 1
         libro.save()
-        
     return redirect('gestion:prestamos')
+
+def lista_multas(request):
+    actualizar_multas_vencidas()
+    # Solo mostramos multas de libros NO devueltos y NO pagadas
+    if request.user.is_superuser:
+        multas = Multa.objects.filter(pagada=False, prestamo__devuelto=False).select_related('prestamo__libro', 'prestamo__lector__user')
+    else:
+        multas = Multa.objects.filter(prestamo__lector__user=request.user, pagada=False, prestamo__devuelto=False)
+    return render(request, 'lista_multas.html', {'multas': multas})

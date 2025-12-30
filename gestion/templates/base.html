@@ -20,18 +20,18 @@
             position: relative;
         }
 
-        /* 2. CONTENEDOR DE PARTÍCULAS (EL FONDO QUE SE MUEVE) */
+        /* 2. CONTENEDOR DE PARTÍCULAS */
         #particles-js {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #121212; /* Asegura que el fondo sea el mismo color */
-            z-index: 1; /* Fondo detrás de todo */
+            background-color: #121212;
+            z-index: 1;
         }
         
-        /* 3. Contenedor principal para que el contenido flote sobre las partículas */
+        /* 3. Contenedor principal */
         .content-wrap {
             position: relative;
             z-index: 10; 
@@ -42,10 +42,10 @@
             background-color: rgba(18, 18, 18, 0.95) !important; 
             box-shadow: 0 4px 12px rgba(0, 255, 136, 0.15); 
             border-bottom: 1px solid rgba(0, 255, 136, 0.2); 
-            z-index: 100; /* Asegura que la navbar esté siempre arriba */
+            z-index: 100;
         }
         .navbar-brand, .nav-link { color: #E0E0E0 !important; }
-        .nav-link:hover { color: #00FF88 !important; } /* Resaltado verde neón */
+        .nav-link:hover { color: #00FF88 !important; } 
         .text-neon { color: #00FF88 !important; }
         
         /* 5. Hero (Cabecera) */
@@ -60,19 +60,20 @@
             margin-top: -56px;
             position: relative;
             z-index: 10; 
-            border-bottom: 2px solid #00FF88; /* Línea inferior neón */
+            border-bottom: 2px solid #00FF88;
         }
         
-        /* 6. Estilo para el contenido principal: tarjeta flotante */
+        /* 6. Estilo para el contenido principal */
         .main-content-card {
             background-color: #242424; 
             border-radius: 12px;
             padding: 30px;
-            box-shadow: 0 8px 30px rgba(0, 255, 136, 0.2); /* Sombra más visible */
+            box-shadow: 0 8px 30px rgba(0, 255, 136, 0.2);
             border: 1px solid rgba(0, 255, 136, 0.3);
             margin-top: -50px; 
             position: relative;
             z-index: 20; 
+            margin-bottom: 50px;
         }
         
         /* 7. Botones neón */
@@ -87,7 +88,6 @@
             background: #00E070;
             box-shadow: 0 0 15px #00FF88;
         }
-        
     </style>
 </head>
 <body>
@@ -97,7 +97,7 @@
     <div class="content-wrap">
         <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
             <div class="container">
-                <a class="navbar-brand fw-bold" href="/">
+                <a class="navbar-brand fw-bold" href="{% url 'gestion:inicio' %}">
                     <i class="bi bi-book-half text-neon me-2"></i>Biblioteca Josué
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
@@ -109,7 +109,9 @@
                         <li class="nav-item"><a class="nav-link" href="{% url 'gestion:libros' %}">Libros</a></li> 
                         <li class="nav-item"><a class="nav-link" href="{% url 'gestion:autores' %}">Autores</a></li>
                         <li class="nav-item"><a class="nav-link" href="{% url 'gestion:prestamos' %}">Préstamos</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Multas</a></li>
+                        
+                        <li class="nav-item"><a class="nav-link" href="{% url 'gestion:lista_multas' %}">Multas</a></li>
+                        
                         <li class="nav-item"><a class="nav-link text-neon" href="/admin/">Admin</a></li>
                     </ul>
                 </div>
@@ -132,21 +134,20 @@
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
     
     <script>
         particlesJS('particles-js', {
             "particles": {
                 "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
-                "color": { "value": "#00FF88" }, /* Color neón */
+                "color": { "value": "#00FF88" },
                 "shape": { "type": "circle" },
                 "opacity": { "value": 0.5, "random": false, "anim": { "enable": false } },
                 "size": { "value": 3, "random": true, "anim": { "enable": false } },
                 "line_linked": {
                     "enable": true,
                     "distance": 150,
-                    "color": "#00E070", /* Color de las líneas */
+                    "color": "#00E070",
                     "opacity": 0.4,
                     "width": 1
                 },
@@ -157,23 +158,19 @@
                     "random": false,
                     "straight": false,
                     "out_mode": "out",
-                    "bounce": false,
-                    "attract": { "enable": false, "rotateX": 600, "rotateY": 1200 }
+                    "bounce": false
                 }
             },
             "interactivity": {
                 "detect_on": "canvas",
                 "events": {
-                    "onhover": { "enable": true, "mode": "grab" }, /* Las líneas se conectan al mouse */
+                    "onhover": { "enable": true, "mode": "grab" },
                     "onclick": { "enable": true, "mode": "push" },
                     "resize": true
                 },
                 "modes": {
                     "grab": { "distance": 140, "line_linked": { "opacity": 1 } },
-                    "bubble": { "distance": 400, "size": 40, "duration": 2, "opacity": 8, "speed": 3 },
-                    "repulse": { "distance": 200, "duration": 0.4 },
-                    "push": { "particles_nb": 4 },
-                    "remove": { "particles_nb": 2 }
+                    "push": { "particles_nb": 4 }
                 }
             },
             "retina_detect": true

@@ -1,10 +1,7 @@
 from django.db import models
 from django.utils import timezone
-from django.contrib.auth.models import User # <--- ¡Nueva importación crucial!
+from django.contrib.auth.models import User
 
-# ----------------------------------------------------
-# 1. MODELO AUTOR
-# ----------------------------------------------------
 class Autor(models.Model):
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
@@ -18,9 +15,6 @@ class Autor(models.Model):
     def __str__(self):
         return self.nombre_completo
 
-# ----------------------------------------------------
-# 2. MODELO LIBRO
-# ----------------------------------------------------
 class Libro(models.Model):
     titulo = models.CharField(max_length=200)
     autor = models.ForeignKey(Autor, on_delete=models.CASCADE)
@@ -33,14 +27,8 @@ class Libro(models.Model):
     class Meta:
         verbose_name_plural = "Libros"
 
-# ----------------------------------------------------
-# 3. MODELO LECTOR (ACTUALIZADO PARA AUTENTICACIÓN)
-# ----------------------------------------------------
 class Lector(models.Model):
-    # Clave primaria vinculada al usuario de Django Auth (user es el nombre estándar)
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True) 
-    
-    # Quitamos 'nombre' y 'email' porque vienen del modelo User.
     identificacion = models.CharField(max_length=20, unique=True)
     telefono = models.CharField(max_length=15, blank=True, null=True) 
 
@@ -51,16 +39,11 @@ class Lector(models.Model):
         verbose_name = "Usuario"          
         verbose_name_plural = "Usuarios"
 
-# ----------------------------------------------------
-# 4. MODELO PRÉSTAMO
-# ----------------------------------------------------
 class Prestamo(models.Model):
     libro = models.ForeignKey(Libro, on_delete=models.CASCADE)
     lector = models.ForeignKey(Lector, on_delete=models.CASCADE)
-    
     fecha_prestamo = models.DateField(default=timezone.now)
     fecha_devolucion_esperada = models.DateField()
-    
     devuelto = models.BooleanField(default=False) 
 
     def __str__(self):
@@ -69,3 +52,16 @@ class Prestamo(models.Model):
     class Meta:
         verbose_name_plural = "Préstamos"
         ordering = ['devuelto', '-fecha_prestamo']
+
+class Multa(models.Model):
+    prestamo = models.ForeignKey(Prestamo, on_delete=models.CASCADE)
+    monto = models.DecimalField(max_digits=6, decimal_places=2, default=2.00)
+    pagada = models.BooleanField(default=False)
+    fecha_generacion = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        # Concatenación de nombre de usuario y monto para el Admin
+        return f"Multa de {self.prestamo.lector.user.username} - ${self.monto}"
+
+    class Meta:
+        verbose_name_plural = "Multas"

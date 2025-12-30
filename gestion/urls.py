@@ -16,22 +16,16 @@ urlpatterns = [
     path('autores/', views.lista_autores, name='autores'),
     
     # Módulo Préstamos 
-    # 1. Listado
     path('prestamos/', views.lista_prestamos, name='prestamos'),
-    # 2. Registro de Nuevo Préstamo
     path('prestamos/nuevo/', views.nuevo_prestamo, name='nuevo_prestamo'),
-    # 3. RUTA NUEVA: Para registrar la devolución de un préstamo
     path('prestamos/devolver/<int:pk>/', views.devolver_prestamo, name='devolver_prestamo'),
     
     # MÓDULO LECTORES/USUARIOS
-    
-    # 1. RUTA ANTIGUA: Registro de Lector (sin contraseña)
     path('lectores/nuevo/', views.registro_lector, name='registro_lector'),
-
-    # 2. RUTA NUEVA: Registro de Usuario (¡CON CONTRASEÑA y Django Auth!)
-    # Usamos 'usuarios/' en la URL para distinguirla de la antigua 'lectores/'
     path('usuarios/registro/', views.registro_usuario, name='registro_usuario'), 
-    
-    # 3. Listado de Lectores/Usuarios (Asumiendo que esta URL llama a lista_lectores)
     path('lectores/', views.lista_lectores, name='lectores'),
+
+    # MÓDULO MULTAS
+    # IMPORTANTE: He puesto 'lista_multas' para que coincida con el menú neón
+    path('multas/', views.lista_multas, name='lista_multas'),
 ]
