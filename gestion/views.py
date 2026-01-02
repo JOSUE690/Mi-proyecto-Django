@@ -23,12 +23,12 @@ def actualizar_multas_vencidas():
             multa.monto = monto_total
             multa.save()
 
+# --- VISTA DE INICIO ---
 def index(request):
     actualizar_multas_vencidas()
     total_libros = Libro.objects.count()
     total_autores = Autor.objects.count()
     total_copias = Libro.objects.aggregate(Sum('copias_disponibles'))['copias_disponibles__sum'] or 0
-    # Solo sumamos multas pendientes de pago
     total_multas_valor = Multa.objects.filter(pagada=False).aggregate(Sum('monto'))['monto__sum'] or 0
     
     context = {
@@ -39,6 +39,7 @@ def index(request):
     }
     return render(request, 'inicio.html', context)
 
+# --- GESTIÓN DE LIBROS Y AUTORES ---
 def lista_libros(request):
     libros = Libro.objects.all().select_related('autor').order_by('titulo')
     query = request.GET.get('q') 
@@ -54,6 +55,7 @@ def lista_autores(request):
     autores = Autor.objects.all().order_by('nombre').prefetch_related('libro_set')
     return render(request, 'lista_autores.html', {'autores': autores})
 
+# --- GESTIÓN DE USUARIOS/LECTORES ---
 def registro_lector(request):
     if request.method == 'POST':
         nombre, identificacion = request.POST.get('nombre'), request.POST.get('identificacion')
@@ -77,6 +79,7 @@ def lista_lectores(request):
     lectores = Lector.objects.all().order_by('identificacion')
     return render(request, 'lista_lectores.html', {'lectores': lectores})
 
+# --- GESTIÓN DE PRÉSTAMOS ---
 def lista_prestamos(request):
     prestamos = Prestamo.objects.all().select_related('libro', 'lector')
     query = request.GET.get('q')
@@ -108,7 +111,6 @@ def devolver_prestamo(request, pk):
     prestamo = get_object_or_404(Prestamo, pk=pk)
     if not prestamo.devuelto:
         actualizar_multas_vencidas()
-        # Marcamos multa como pagada al recibir el libro
         Multa.objects.filter(prestamo=prestamo).update(pagada=True)
         prestamo.devuelto = True
         prestamo.save()
@@ -117,11 +119,37 @@ def devolver_prestamo(request, pk):
         libro.save()
     return redirect('gestion:prestamos')
 
+# --- GESTIÓN DE MULTAS ---
 def lista_multas(request):
     actualizar_multas_vencidas()
-    # Solo mostramos multas de libros NO devueltos y NO pagadas
     if request.user.is_superuser:
-        multas = Multa.objects.filter(pagada=False, prestamo__devuelto=False).select_related('prestamo__libro', 'prestamo__lector__user')
+        multas = Multa.objects.filter(pagada=False, prestamo__devuelto=False).select_related('prestamo__libro', 'prestamo__lector')
     else:
-        multas = Multa.objects.filter(prestamo__lector__user=request.user, pagada=False, prestamo__devuelto=False)
+        # Usamos prestamo__lector__user_id para mayor seguridad
+        multas = Multa.objects.filter(prestamo__lector__user_id=request.user.id, pagada=False, prestamo__devuelto=False)
     return render(request, 'lista_multas.html', {'multas': multas})
+
+# --- GESTIÓN DE FACTURACIÓN (COMMIT 7) ---
+def lista_facturas(request):
+    """
+    Agrupa deudas por lector usando campos seguros (identificacion, user_id).
+    Usa agregaciones SQL: SUM, COUNT y MAX. [cite: 2025-11-12]
+    """
+    actualizar_multas_vencidas()
+    
+    # Agrupamos por los campos que el error confirmó que existen
+    facturas = Multa.objects.filter(pagada=False).values(
+        'prestamo__lector__identificacion', 
+        'prestamo__lector__user_id'
+    ).annotate(
+        total_deuda=Sum('monto'),
+        cantidad_libros=Count('id')
+    ).order_by('-total_deuda')
+
+    # Deuda más alta encontrada con MAX
+    deuda_maxima = Multa.objects.filter(pagada=False).aggregate(Max('monto'))['monto__max'] or 0
+
+    return render(request, 'lista_facturas.html', {
+        'facturas': facturas,
+        'deuda_maxima': deuda_maxima
+    })

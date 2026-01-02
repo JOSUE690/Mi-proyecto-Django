@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Facturación | Biblioteca Josué{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-neon"><i class="bi bi-receipt-cutoff me-2"></i>Reporte de Facturación</h2>
+    <div class="badge bg-dark border border-success p-2">
+        <span class="text-white">Deuda Máxima Registrada: </span>
+        <span class="text-neon fw-bold">${{ deuda_maxima }}</span>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-dark table-hover border-success">
+        <thead>
+            <tr class="text-neon border-bottom border-success">
+                <th>Usuario (ID)</th> <th>Identificación (Cédula)</th>
+                <th>Libros Pendientes</th>
+                <th>Total a Pagar</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for factura in facturas %}
+            <tr>
+                <td class="fw-bold text-white">Lector #{{ factura.prestamo__lector__user_id }}</td>
+                
+                <td>{{ factura.prestamo__lector__identificacion }}</td>
+                
+                <td>
+                    <span class="badge rounded-pill bg-info text-dark">
+                        {{ factura.cantidad_libros }} libro(s) </span>
+                </td>
+                <td class="text-neon fw-bold">
+                    ${{ factura.total_deuda }} </td>
+                <td>
+                    <button class="btn btn-sm btn-futuristic" onclick="window.print()">
+                        <i class="bi bi-printer me-1"></i> Imprimir
+                    </button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center text-muted py-4">No hay facturas pendientes de cobro.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+    /* Estilo para el botón futurista si no lo tienes */
+    .btn-futuristic {
+        background: transparent;
+        color: #39ff14;
+        border: 1px solid #39ff14;
+        box-shadow: 0 0 5px #39ff14;
+    }
+    .btn-futuristic:hover {
+        background: #39ff14;
+        color: #000;
+        box-shadow: 0 0 20px #39ff14;
+    }
+</style>
+{% endblock %}

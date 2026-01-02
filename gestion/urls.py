@@ -25,7 +25,10 @@ urlpatterns = [
     path('usuarios/registro/', views.registro_usuario, name='registro_usuario'), 
     path('lectores/', views.lista_lectores, name='lectores'),
 
-    # MÓDULO MULTAS
+    # MÓDULO MULTAS Y FACTURACIÓN
     # IMPORTANTE: He puesto 'lista_multas' para que coincida con el menú neón
     path('multas/', views.lista_multas, name='lista_multas'),
+    
+    # RUTA AÑADIDA PARA EL COMMIT 7 [cite: 2025-11-12]
+    path('facturas/', views.lista_facturas, name='lista_facturas'),
 ]
