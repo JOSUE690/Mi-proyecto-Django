@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid py-5" style="background-color: #0d0d0d; min-height: 100vh; color: #ffffff;">
+    
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold" style="text-transform: uppercase; letter-spacing: 2px;">
+            Sistema de Gestión de Biblioteca
+        </h1>
+        <p style="color: #00ff88;">Tecnología de punta para la administración de recursos</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-9">
+            <div class="card shadow-lg" style="background: #2a2a2a; border: 1px solid #444; border-radius: 15px;">
+                <div class="card-body p-5 text-center">
+                    
+                    <h2 class="mb-4 text-white">
+                        🔎 Buscador Global de Libros
+                    </h2>
+                    <hr style="border-color: #555; margin-bottom: 30px;">
+
+                    <form method="GET" action="{% url 'gestion:buscar_api' %}" class="row g-2 justify-content-center mb-5">
+                        <div class="col-md-8">
+                            <input type="text" name="isbn" class="form-control form-control-lg bg-white text-dark" 
+                                   placeholder="Ingresa el ISBN (ej: 8435015742)" value="{{ isbn|default:'' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold">
+                                Buscar en la Nube
+                            </button>
+                        </div>
+                    </form>
+
+                    {% if libro %}
+                    <div class="mt-4 p-4 text-start shadow-lg" style="background-color: white; border-radius: 8px; color: #333; max-width: 650px; margin: 0 auto;">
+                        <div class="row g-0 align-items-center">
+                            <div class="col-md-5 text-center">
+                                {% if libro.portada %}
+                                    <img src="{{ libro.portada }}" class="img-fluid rounded shadow" alt="Portada" style="max-height: 280px;">
+                                {% else %}
+                                    <div class="bg-secondary text-white p-5 rounded">Sin Portada</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-7">
+                                <div class="card-body ps-4">
+                                    <h3 class="card-title mb-1" style="color: #2c3e50; font-weight: 500;">{{ libro.titulo }}</h3>
+                                    <p class="mb-1" style="font-size: 0.95rem;"><strong>Autor(es):</strong> {{ libro.autores }}</p>
+                                    <p class="mb-2" style="font-size: 0.95rem;"><strong>Páginas:</strong> {{ libro.paginas }}</p>
+                                    <p class="text-muted mb-4" style="font-size: 0.8rem;">Datos obtenidos de Open Library API</p>
+                                    
+                                    <form method="GET" action="{% url 'gestion:buscar_api' %}">
+                                        <input type="hidden" name="isbn" value="{{ isbn }}">
+                                        <button type="submit" name="confirmar_importar" class="btn btn-outline-success fw-bold" style="border-radius: 5px; padding: 8px 20px;">
+                                            Importar a mi Sistema
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% elif isbn %}
+                        <div class="alert alert-dark mt-4 border-warning text-warning">
+                            No se encontraron resultados para el ISBN: {{ isbn }}
+                        </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
