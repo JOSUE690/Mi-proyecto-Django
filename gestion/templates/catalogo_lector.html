@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Catálogo de Libros | Biblioteca Josué{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-white"><i class="bi bi-grid-3x3-gap text-neon me-2"></i>Catálogo Disponible</h2>
+    
+    <form method="GET" class="d-flex w-50">
+        <div class="input-group">
+            <input type="text" name="q" class="form-control bg-transparent text-white border-neon" 
+                   placeholder="Buscar por título o autor..." value="{{ query|default:'' }}">
+            <button class="btn btn-futuristic" type="submit">
+                <i class="bi bi-search"></i>
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for libro in libros %}
+    <div class="col">
+        <div class="card h-100 bg-dark border-neon shadow-sm card-hover" style="border: 1px solid rgba(0, 255, 136, 0.2);">
+            <div class="card-body">
+                <h5 class="card-title text-neon fw-bold">{{ libro.titulo }}</h5>
+                <h6 class="card-subtitle mb-2 text-white-50">
+                    <i class="bi bi-person-badge me-1"></i>{{ libro.autor.nombre }} {{ libro.autor.apellido }}
+                </h6>
+                <hr class="border-neon opacity-25">
+                
+                <div class="mb-3">
+                    <small class="text-white-50 d-block">Valor del ejemplar:</small>
+                    <span class="text-neon fs-4 fw-bold">${{ libro.precio }}</span>
+                </div>
+
+                <p class="card-text small text-white-50">
+                    Disponibles: <span class="badge bg-transparent border border-neon text-neon">{{ libro.copias_disponibles }}</span>
+                </p>
+            </div>
+            <div class="card-footer bg-transparent border-0 pb-3">
+                <div class="d-grid">
+                    <a href="{% url 'gestion:escoger_libro' libro.id %}" 
+                       class="btn btn-futuristic btn-sm fw-bold"
+                       onclick="return confirm('¿Confirmas que deseas llevarte este libro prestado?')">
+                        <i class="bi bi-plus-circle me-1"></i> Escoger este libro
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5">
+        <i class="bi bi-book text-white-50" style="font-size: 3rem;"></i>
+        <p class="text-white-50 mt-3">No hay libros con copias disponibles en este momento.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+    .text-neon { color: #00FF88 !important; }
+    .border-neon { border-color: #00FF88 !important; }
+    .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0 15px rgba(0, 255, 136, 0.2) !important;
+        border-color: #00FF88 !important;
+    }
+    .btn-futuristic {
+        color: #00FF88;
+        border: 1px solid #00FF88;
+        background: transparent;
+        transition: 0.3s;
+    }
+    .btn-futuristic:hover {
+        background: #00FF88;
+        color: #000;
+        box-shadow: 0 0 10px #00FF88;
+    }
+</style>
+{% endblock %}

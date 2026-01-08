@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis Libros | Biblioteca Josué{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h2 class="fw-bold text-white"><i class="bi bi-journal-check text-neon me-2"></i>Mis Libros Actuales</h2>
+    <p class="text-white-50">Aquí puedes ver los libros que tienes en tu poder y cuándo debes devolverlos.</p>
+</div>
+
+<div class="row">
+    {% for p in prestamos %}
+    <div class="col-md-4 mb-4">
+        <div class="card bg-dark border-neon h-100 shadow-lg" style="border: 1px solid #00d4ff;">
+            <div class="card-body">
+                <h5 class="text-neon fw-bold">{{ p.libro.titulo }}</h5>
+                <hr class="border-secondary">
+                <p class="text-white-50 small mb-1">
+                    <i class="bi bi-calendar-event me-2"></i>Prestado el: {{ p.fecha_prestamo|date:"d/m/Y" }}
+                </p>
+                <p class="text-warning fw-bold">
+                    <i class="bi bi-clock-history me-2"></i>Devolver: {{ p.fecha_devolucion_esperada|date:"d/m/Y" }}
+                </p>
+            </div>
+            <div class="card-footer bg-transparent border-0 text-center pb-3">
+                <span class="badge rounded-pill bg-info text-dark px-3">En Posesión</span>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5">
+        <div class="card bg-dark border-secondary p-5">
+            <i class="bi bi-emoji-neutral text-muted fs-1 mb-3"></i>
+            <h4 class="text-white">No tienes préstamos activos</h4>
+            <p class="text-secondary">¿Buscas algo nuevo que leer?</p>
+            <a href="{% url 'gestion:catalogo_lector' %}" class="btn btn-futuristic w-50 mx-auto mt-3">Ir al Catálogo</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+    .border-neon { border-color: #00d4ff !important; box-shadow: 0 0 10px rgba(0, 212, 255, 0.2); }
+</style>
+{% endblock %}

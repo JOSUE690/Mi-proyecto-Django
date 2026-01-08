@@ -1,85 +1,110 @@
 {% extends "base.html" %}
 
-{% block title %}Panel Dinámico | Módulos Centrales{% endblock %}
+{% block title %}Panel Dinámico | Biblioteca Josué{% endblock %}
 
 {% block content %}
 <div class="py-3">
-    <h1 class="display-6 fw-bold mb-1 text-neon">Panel de Módulos Central</h1>
+    <h1 class="display-6 fw-bold mb-1 text-neon">Bienvenido, {{ user.username }}</h1>
     <p class="lead text-muted mb-4">Seleccione el módulo que desea gestionar en la plataforma dinámica.</p>
     
     <div class="alert alert-dark border-start border-3 border-neon text-light" role="alert">
-        <i class="bi bi-shield-fill-check me-2 text-neon"></i> **MODULOS.** Inicie la gestión de datos.
+        <i class="bi bi-shield-fill-check me-2 text-neon"></i> 
+        {% if user.is_superuser %} **MODO ADMINISTRADOR:** Acceso total al sistema. {% else %} **MODO LECTOR:** Gestiona tus libros y deudas. {% endif %}
     </div>
 
-    <h3 class="mt-4 mb-3 text-neon border-bottom pb-2">Módulos del Sistema</h3>
+    <h3 class="mt-4 mb-3 text-neon border-bottom pb-2">Módulos Disponibles</h3>
 
     <div class="row">
         
         <div class="col-lg-4 col-md-6 mb-4">
             <div class="card h-100 shadow-lg text-center p-3" style="background-color: #242424; border: 2px solid rgba(0, 255, 136, 0.5); border-radius: 10px;">
-                <div class="card-body">
+                <div class="card-body d-flex flex-column">
                     <i class="bi bi-book-half text-neon fs-1 mb-3"></i>
-                    <h5 class="card-title fw-bold text-light">Catálogo de Recursos</h5>
-                    <p class="card-text text-secondary small">Gestión completa del inventario bibliográfico.</p>
-                    <a href="{% url 'gestion:libros' %}" class="btn btn-futuristic mt-2 w-75">
-                        <i class="bi bi-box-arrow-in-right me-2"></i> Ir a Gestión
-                    </a>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-lg-4 col-md-6 mb-4">
-            <div class="card h-100 shadow-lg text-center p-3" style="background-color: #242424; border: 2px solid rgba(255, 165, 0, 0.4); border-radius: 10px;">
-                <div class="card-body">
-                    <i class="bi bi-people-fill text-warning fs-1 mb-3"></i>
-                    <h5 class="card-title fw-bold text-light">Registro de Autores</h5>
-                    <p class="card-text text-secondary small">Administración de los creadores y sus datos.</p>
-                    <a href="{% url 'gestion:autores' %}" class="btn btn-outline-warning mt-2 w-75">Ir a Gestión</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-4 col-md-6 mb-4">
-            <div class="card h-100 shadow-lg text-center p-3" style="background-color: #242424; border: 2px solid rgba(255, 0, 0, 0.4); border-radius: 10px;">
-                <div class="card-body">
-                    <i class="bi bi-arrow-down-up text-danger fs-1 mb-3"></i>
-                    <h5 class="card-title fw-bold text-light">Control de Préstamos</h5>
-                    <p class="card-text text-secondary small">Registro y seguimiento de transacciones.</p>
-                    <a href="{% url 'gestion:prestamos' %}" class="btn btn-outline-danger mt-2 w-75">
-                        <i class="bi bi-box-arrow-in-right me-2"></i> Ir a Gestión
-                    </a>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-lg-4 col-md-6 mb-4">
-            <div class="card h-100 shadow-lg text-center p-3" style="background-color: #242424; border: 2px solid rgba(0, 191, 255, 0.4); border-radius: 10px;">
-                <div class="card-body">
-                    <i class="bi bi-person-circle text-info fs-1 mb-3"></i>
-                    <h5 class="card-title fw-bold text-light">Gestión de Lectores (Usuarios)</h5>
-                    <p class="card-text text-secondary small">Registro y listado de usuarios de la biblioteca.</p>
-                    
-                    <a href="{% url 'gestion:lectores' %}" class="btn btn-info mt-2 w-75 fw-bold text-dark">
-                        <i class="bi bi-person-lines-fill me-2"></i> Ver Listado
-                    </a>
-                    
-                    <a href="{% url 'gestion:registro_lector' %}" class="btn btn-outline-info mt-2 w-75">
-                        <i class="bi bi-person-plus-fill me-2"></i> Registrar Nuevo
+                    <h5 class="card-title fw-bold text-light">Catálogo de Libros</h5>
+                    <p class="card-text text-secondary small">Explora los libros disponibles y escoge el tuyo.</p>
+                    <a href="{% url 'gestion:catalogo_lector' %}" class="btn btn-futuristic mt-auto w-75 mx-auto">
+                        <i class="bi bi-search me-2"></i> Ver Catálogo
                     </a>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-4 col-md-6 mb-4">
-            <div class="card h-100 shadow-lg text-center p-3" style="background-color: #242424; border: 2px solid rgba(150, 150, 150, 0.4); border-radius: 10px;">
-                <div class="card-body">
-                    <i class="bi bi-gear-fill text-secondary fs-1 mb-3"></i>
-                    <h5 class="card-title fw-bold text-light">Configuración (Admin)</h5>
-                    <p class="card-text text-secondary small">Acceso al panel de configuración avanzada.</p>
-                    <a href="/admin/" class="btn btn-outline-secondary mt-2 w-75">Acceder</a>
+        {% if not user.is_superuser %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 shadow-lg text-center p-3" style="background-color: #242424; border: 2px solid rgba(255, 200, 0, 0.5); border-radius: 10px;">
+                    <div class="card-body d-flex flex-column">
+                        <i class="bi bi-cash-stack text-warning fs-1 mb-3"></i>
+                        <h5 class="card-title fw-bold text-light">Mis Multas</h5>
+                        <p class="card-text text-secondary small">Consulta tus deudas y estado de devoluciones.</p>
+                        <a href="{% url 'gestion:multas' %}" class="btn btn-outline-warning mt-auto w-75 mx-auto">
+                            <i class="bi bi-wallet2 me-2"></i> Ver mis Multas
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
+
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 shadow-lg text-center p-3" style="background-color: #242424; border: 2px solid rgba(0, 191, 255, 0.5); border-radius: 10px;">
+                    <div class="card-body d-flex flex-column">
+                        <i class="bi bi-journal-bookmark-fill text-info fs-1 mb-3"></i>
+                        <h5 class="card-title fw-bold text-light">Mis Préstamos</h5>
+                        <p class="card-text text-secondary small">Consulta los libros que tienes actualmente.</p>
+                        <a href="{% url 'gestion:mis_prestamos' %}" class="btn btn-outline-info mt-auto w-75 mx-auto">
+                            <i class="bi bi-eye me-2"></i> Ver lo que tengo
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if user.is_superuser %}
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 shadow-lg text-center p-3" style="background-color: #242424; border: 2px solid rgba(255, 165, 0, 0.4); border-radius: 10px;">
+                    <div class="card-body d-flex flex-column">
+                        <i class="bi bi-people-fill text-warning fs-1 mb-3"></i>
+                        <h5 class="card-title fw-bold text-light">Registro de Autores</h5>
+                        <p class="card-text text-secondary small">Administración de los creadores y sus datos.</p>
+                        <a href="{% url 'gestion:autores' %}" class="btn btn-outline-warning mt-auto w-75 mx-auto">Gestionar</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 shadow-lg text-center p-3" style="background-color: #242424; border: 2px solid rgba(255, 0, 0, 0.4); border-radius: 10px;">
+                    <div class="card-body d-flex flex-column">
+                        <i class="bi bi-arrow-down-up text-danger fs-1 mb-3"></i>
+                        <h5 class="card-title fw-bold text-light">Control de Préstamos</h5>
+                        <p class="card-text text-secondary small">Seguimiento global de transacciones.</p>
+                        <a href="{% url 'gestion:prestamos' %}" class="btn btn-outline-danger mt-auto w-75 mx-auto">Ir a Gestión</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 shadow-lg text-center p-3" style="background-color: #242424; border: 2px solid rgba(0, 191, 255, 0.4); border-radius: 10px;">
+                    <div class="card-body d-flex flex-column">
+                        <i class="bi bi-person-circle text-info fs-1 mb-3"></i>
+                        <h5 class="card-title fw-bold text-light">Gestión de Lectores</h5>
+                        <p class="card-text text-secondary small">Administrar usuarios y nuevos registros.</p>
+                        <a href="{% url 'gestion:lectores' %}" class="btn btn-info mt-auto w-75 mx-auto fw-bold text-dark mb-2">Ver Listado</a>
+                        <a href="{% url 'gestion:registro_lector' %}" class="btn btn-outline-info w-75 mx-auto small">Registrar Nuevo</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 shadow-lg text-center p-3" style="background-color: #242424; border: 2px solid rgba(150, 150, 150, 0.4); border-radius: 10px;">
+                    <div class="card-body d-flex flex-column">
+                        <i class="bi bi-gear-fill text-secondary fs-1 mb-3"></i>
+                        <h5 class="card-title fw-bold text-light">Configuración (Admin)</h5>
+                        <p class="card-text text-secondary small">Panel avanzado de Django.</p>
+                        <a href="/admin/" class="btn btn-outline-secondary mt-auto w-75 mx-auto">Acceder</a>
+                    </div>
+                </div>
+            </div>
+
+        {% endif %}
 
     </div>
 </div>

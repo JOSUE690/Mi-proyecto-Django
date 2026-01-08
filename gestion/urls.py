@@ -6,7 +6,17 @@ app_name = 'gestion'
 urlpatterns = [
     # --- INICIO ---
     path('', views.index, name='inicio'),
-    path('index/', views.index, name='index'), # Por si acaso usas 'index'
+    path('index/', views.index, name='index'), 
+
+    # --- AUTENTICACIÓN ---
+    path('login/', views.ingresar, name='ingresar'),
+    path('logout/', views.salir, name='salir'),
+
+    # --- MODO LECTOR / USUARIO ---
+    path('catalogo/', views.catalogo_lector, name='catalogo_lector'),
+    path('escoger/<int:libro_id>/', views.escoger_libro, name='escoger_libro'),
+    # NUEVA RUTA AGREGADA AQUÍ:
+    path('mis-prestamos/', views.mis_prestamos, name='mis_prestamos'),
 
     # --- LIBROS Y AUTORES ---
     path('libros/', views.lista_libros, name='libros'),
@@ -21,7 +31,7 @@ urlpatterns = [
     path('registro-lector/', views.registro_lector, name='registro_lector'),
     path('registro-usuario/', views.registro_usuario, name='registro_usuario'),
 
-    # --- PRÉSTAMOS ---
+    # --- PRÉSTAMOS (ADMIN) ---
     path('prestamos/', views.lista_prestamos, name='prestamos'),
     path('prestamos/lista/', views.lista_prestamos, name='lista_prestamos'),
     path('nuevo-prestamo/', views.nuevo_prestamo, name='nuevo_prestamo'),
@@ -29,7 +39,7 @@ urlpatterns = [
 
     # --- MULTAS Y FACTURACIÓN ---
     path('multas/', views.lista_multas, name='multas'),
-    path('multas/lista/', views.lista_multas, name='lista_multas'), # <-- ESTA LÍNEA ARREGLA TU ERROR ACTUAL
+    path('multas/lista/', views.lista_multas, name='multas_lista'), 
     path('facturas/', views.lista_facturas, name='facturas'),
     path('facturas/lista/', views.lista_facturas, name='lista_facturas'),
 

@@ -19,7 +19,13 @@ class Libro(models.Model):
     titulo = models.CharField(max_length=200)
     autor = models.ForeignKey(Autor, on_delete=models.CASCADE)
     publicacion = models.IntegerField(null=True, blank=True)
-    copias_disponibles = models.PositiveIntegerField(default=0) 
+    copias_disponibles = models.PositiveIntegerField(default=0)
+    paginas = models.PositiveIntegerField(default=0, blank=True, null=True) 
+    portada_url = models.URLField(max_length=500, blank=True, null=True)
+    
+    # --- CAMPO PARA EL VALOR DEL LIBRO ---
+    # Usamos DecimalField para manejar dinero con precisión
+    precio = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Valor del Libro")
 
     def __str__(self):
         return self.titulo
@@ -60,7 +66,6 @@ class Multa(models.Model):
     fecha_generacion = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        # Concatenación de nombre de usuario y monto para el Admin
         return f"Multa de {self.prestamo.lector.user.username} - ${self.monto}"
 
     class Meta:

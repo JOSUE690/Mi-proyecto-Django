@@ -105,18 +105,35 @@
                 </button>
                 <div class="collapse navbar-collapse" id="menu">
                     <ul class="navbar-nav ms-auto">
-                        <li class="nav-item"><a class="nav-link" href="{% url 'gestion:inicio' %}">Inicio</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{% url 'gestion:libros' %}">Libros</a></li> 
-                        <li class="nav-item"><a class="nav-link" href="{% url 'gestion:autores' %}">Autores</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{% url 'gestion:prestamos' %}">Préstamos</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{% url 'gestion:multas' %}">Multas</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{% url 'gestion:facturas' %}">Factura</a></li>
+                        {% if user.is_authenticated %}
+                            <li class="nav-item"><a class="nav-link" href="{% url 'gestion:inicio' %}">Inicio</a></li>
+                            
+                            {% if user.is_superuser %}
+                                <li class="nav-item"><a class="nav-link" href="{% url 'gestion:libros' %}">Libros</a></li> 
+                                <li class="nav-item"><a class="nav-link" href="{% url 'gestion:autores' %}">Autores</a></li>
+                                <li class="nav-item"><a class="nav-link" href="{% url 'gestion:prestamos' %}">Préstamos</a></li>
+                                <li class="nav-item"><a class="nav-link" href="{% url 'gestion:multas' %}">Multas</a></li>
+                                <li class="nav-item"><a class="nav-link" href="{% url 'gestion:facturas' %}">Factura</a></li>
+                                <li class="nav-item"><a class="nav-link" href="{% url 'gestion:buscar_api' %}">Buscar Online</a></li>
+                            {% else %}
+                                <li class="nav-item"><a class="nav-link text-neon" href="{% url 'gestion:catalogo_lector' %}">Escoger Libros</a></li>
+                                <li class="nav-item"><a class="nav-link" href="{% url 'gestion:multas' %}">Mis Multas</a></li>
+                            {% endif %}
+                            
+                            <li class="nav-item ms-lg-3">
+                                <a class="nav-link text-danger fw-bold" href="{% url 'gestion:salir' %}">
+                                    <i class="bi bi-box-arrow-right"></i> Salir ({{ user.username }})
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link text-neon fw-bold" href="{% url 'gestion:ingresar' %}">
+                                    <i class="bi bi-person-circle"></i> Iniciar Sesión
+                                </a>
+                            </li>
+                        {% endif %}
                         
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'gestion:buscar_api' %}">Buscar Online</a>
-                        </li>
-                        
-                        <li class="nav-item"><a class="nav-link text-neon" href="/admin/">Admin</a></li>
+                        <li class="nav-item"><a class="nav-link opacity-50" href="/admin/">Admin Django</a></li>
                     </ul>
                 </div>
             </div>
@@ -124,8 +141,12 @@
 
         <div class="hero text-center">
             <div class="hero-content">
-                <h1 class="display-3 fw-bold">Sistema de Gestión de Biblioteca</h1>
-                <p class="lead text-neon">Tecnología de punta para la administración de recursos</p>
+                <h1 class="display-3 fw-bold">Sistema de Biblioteca</h1>
+                {% if user.is_authenticated %}
+                    <p class="lead text-neon">Bienvenido de nuevo, <span class="text-white">{{ user.username }}</span></p>
+                {% else %}
+                    <p class="lead text-neon">Tecnología de punta para la administración de recursos</p>
+                {% endif %}
             </div>
         </div>
 
