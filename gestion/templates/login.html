@@ -48,8 +48,9 @@
                 {% if messages %}
                 <div class="mt-4">
                     {% for message in messages %}
-                    <div class="alert alert-danger bg-transparent border-danger text-danger small py-2" role="alert">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ message }}
+                    <div class="alert {% if message.tags == 'success' %}alert-success border-success text-success{% else %}alert-danger border-danger text-danger{% endif %} bg-transparent small py-2" role="alert">
+                        <i class="bi {% if message.tags == 'success' %}bi-check-circle-fill{% else %}bi-exclamation-triangle-fill{% endif %} me-2"></i>
+                        {{ message }}
                     </div>
                     {% endfor %}
                 </div>
@@ -57,18 +58,26 @@
             </div>
         </div>
         
-        <div class="text-center mt-3">
-            <p class="text-white-50 small">¿No tienes cuenta? Contacta al administrador para tu registro.</p>
+        <div class="text-center mt-4">
+            <p class="text-white-50 mb-1">¿Eres un lector nuevo?</p>
+            <a href="{% url 'gestion:registro_usuario' %}" class="btn btn-outline-neon btn-sm">
+                <i class="bi bi-person-plus-fill me-1"></i>Crear Cuenta de Usuario
+            </a>
         </div>
     </div>
 </div>
 
 <style>
-    /* Estilos específicos para este formulario */
+    /* Estilos específicos para mantener la estética neon */
     .border-neon {
         border-color: rgba(0, 255, 136, 0.4) !important;
     }
     
+    .text-neon {
+        color: #00FF88 !important;
+        text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+    }
+
     .form-control:focus {
         background-color: rgba(0, 255, 136, 0.05);
         border-color: #00FF88;
@@ -78,6 +87,24 @@
 
     input::placeholder {
         color: rgba(255, 255, 255, 0.3) !important;
+    }
+
+    /* Botón de esquema neon para Crear Cuenta */
+    .btn-outline-neon {
+        color: #00FF88;
+        border: 1px solid #00FF88;
+        background: transparent;
+        transition: all 0.3s;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+        padding: 8px 20px;
+    }
+
+    .btn-outline-neon:hover {
+        background: rgba(0, 255, 136, 0.1);
+        color: #00FF88;
+        box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
     }
 </style>
 {% endblock %}

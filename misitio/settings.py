@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'gestion',
-      
+    'rest_framework',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -106,7 +107,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-es' # Cambiado a español para mejor uso
 
 TIME_ZONE = 'UTC'
 
@@ -124,3 +125,18 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# --- CONFIGURACIONES FINALES CORREGIDAS ---
+
+# Solución al error NoReverseMatch: se agrega 'gestion:' porque usas app_name
+LOGIN_URL = 'gestion:ingresar'  
+LOGIN_REDIRECT_URL = 'gestion:catalogo_lector'
+LOGOUT_REDIRECT_URL = 'gestion:ingresar'
+
+# Configuración necesaria para que el Bodeguero filtre en la API
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
+}

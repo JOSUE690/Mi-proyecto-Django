@@ -34,7 +34,8 @@ def ingresar(request):
         user = authenticate(username=u, password=p)
         if user is not None:
             login(request, user)
-            return redirect('gestion:inicio')
+            # Redirige a 'next' si existe (para evitar errores 404), sino a inicio
+            return redirect(request.GET.get('next', 'gestion:inicio'))
         else:
             messages.error(request, "Usuario o contraseña incorrectos")
     return render(request, 'login.html')
@@ -82,15 +83,12 @@ def catalogo_lector(request):
 
 @login_required
 def escoger_libro(request, libro_id):
-    # Traemos el libro con su autor para mostrar la ficha técnica en el HTML
     libro = get_object_or_404(Libro.objects.select_related('autor'), id=libro_id)
     
     if request.method == 'POST':
         fecha_str = request.POST.get('fecha_retorno')
         try:
             fecha_esp = datetime.strptime(fecha_str, '%Y-%m-%d').date()
-            
-            # Buscamos el perfil de Lector asociado al usuario logueado
             lector, _ = Lector.objects.get_or_create(
                 user=request.user,
                 defaults={
@@ -128,6 +126,7 @@ def mis_prestamos(request):
     return render(request, 'mis_prestamos.html', {'prestamos': prestamos})
 
 # --- GESTIÓN DE PRÉSTAMOS (ADMIN) ---
+@login_required
 def lista_prestamos(request):
     prestamos = Prestamo.objects.all().select_related('libro', 'lector')
     query = request.GET.get('q')
@@ -144,6 +143,7 @@ def lista_prestamos(request):
     }
     return render(request, 'lista_prestamos.html', context)
 
+@login_required
 def nuevo_prestamo(request):
     if request.method == 'POST':
         libro_id = request.POST.get('libro')
@@ -164,6 +164,7 @@ def nuevo_prestamo(request):
         'lectores': Lector.objects.all()
     })
 
+@login_required
 def devolver_prestamo(request, pk):
     prestamo = get_object_or_404(Prestamo, pk=pk)
     if not prestamo.devuelto:
@@ -177,28 +178,35 @@ def devolver_prestamo(request, pk):
     return redirect('gestion:prestamos')
 
 # --- MULTAS Y FACTURACIÓN ---
+@login_required
 def lista_multas(request):
     actualizar_multas_vencidas()
     if request.user.is_superuser:
         multas = Multa.objects.filter(pagada=False, prestamo__devuelto=False).select_related('prestamo__libro', 'prestamo__lector')
     else:
+        # Aquí se corrige el error del ID: filtramos por el usuario logueado
         multas = Multa.objects.filter(prestamo__lector__user=request.user, pagada=False, prestamo__devuelto=False)
     return render(request, 'lista_multas.html', {'multas': multas})
 
+# --- VISTA NUEVA: ROL BODEGUERO ---
+@login_required
+def inventario_bodega(request):
+    # Esta vista permite al Bodeguero ver la ubicación física (pasillos/estantes)
+    libros = Libro.objects.all().order_by('pasillo', 'estante')
+    query = request.GET.get('pasillo')
+    if query:
+        libros = libros.filter(pasillo__icontains=query)
+    return render(request, 'inventario_bodega.html', {'libros': libros, 'query': query})
+
 def lista_facturas(request):
     actualizar_multas_vencidas()
-    
-    # Filtro base: Multas no pagadas
     multas_pendientes = Multa.objects.filter(pagada=False)
-    
-    # Buscador por cédula o nombre de usuario
     query = request.GET.get('q')
     if query:
         multas_pendientes = multas_pendientes.filter(
             Q(prestamo__lector__identificacion__icontains=query) |
             Q(prestamo__lector__user__username__icontains=query)
         )
-
     facturas = multas_pendientes.values(
         'prestamo__lector__identificacion', 
         'prestamo__lector__user__username'
@@ -206,7 +214,6 @@ def lista_facturas(request):
         total_deuda=Sum('monto'),
         cantidad_libros=Count('id')
     ).order_by('-total_deuda')
-    
     deuda_maxima = multas_pendientes.aggregate(Max('monto'))['monto__max'] or 0
     return render(request, 'lista_facturas.html', {'facturas': facturas, 'deuda_maxima': deuda_maxima, 'query': query})
 
