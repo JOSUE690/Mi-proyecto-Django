@@ -3,5 +3,5 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('gestion.urls')),
+    path('', include('gestion.urls')), # <--- Aquí conectas con el otro archivo
 ]

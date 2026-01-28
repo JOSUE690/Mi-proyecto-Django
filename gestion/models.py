@@ -23,8 +23,10 @@ class Libro(models.Model):
     paginas = models.PositiveIntegerField(default=0, blank=True, null=True) 
     portada_url = models.URLField(max_length=500, blank=True, null=True)
     
+    # --- CAMPO PARA BODEGUERO (UBICACIÓN FÍSICA) ---
+    estante = models.CharField(max_length=50, blank=True, null=True, help_text="Ej: Pasillo A, Estante 3")
+    
     # --- CAMPO PARA EL VALOR DEL LIBRO ---
-    # Usamos DecimalField para manejar dinero con precisión
     precio = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Valor del Libro")
 
     def __str__(self):
@@ -51,6 +53,9 @@ class Prestamo(models.Model):
     fecha_prestamo = models.DateField(default=timezone.now)
     fecha_devolucion_esperada = models.DateField()
     devuelto = models.BooleanField(default=False) 
+    
+    # --- CAMPO PARA EL BIBLIOTECARIO (OBSERVACIONES) ---
+    notas_entrega = models.TextField(blank=True, null=True, help_text="Estado del libro al entregarlo")
 
     def __str__(self):
         return f"Préstamo de {self.libro.titulo} a {self.lector.user.username}"

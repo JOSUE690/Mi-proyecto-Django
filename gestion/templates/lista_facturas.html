@@ -3,64 +3,117 @@
 {% block title %}Facturación | Biblioteca Josué{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="text-neon"><i class="bi bi-receipt-cutoff me-2"></i>Reporte de Facturación</h2>
-    <div class="badge bg-dark border border-success p-2">
-        <span class="text-white">Deuda Máxima Registrada: </span>
-        <span class="text-neon fw-bold">${{ deuda_maxima }}</span>
+<div class="container-fluid">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
+        <h2 class="text-neon"><i class="bi bi-receipt-cutoff me-2"></i>REPORTE DE FACTURACIÓN</h2>
+        
+        <div class="d-flex align-items-center gap-3">
+            <form method="GET" class="d-flex">
+                <div class="input-group">
+                    <span class="input-group-text bg-dark border-success text-success"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" class="form-control bg-dark text-white border-success" 
+                           placeholder="Buscar por Cédula..." value="{{ query|default:'' }}">
+                    <button class="btn btn-outline-success" type="submit">FILTRAR</button>
+                </div>
+            </form>
+
+            <div class="badge bg-dark border border-success p-3 shadow-lg">
+                <span class="text-white-50 small">DEUDA TOTAL EN CALLE: </span>
+                <span class="text-neon fw-bold fs-5">${{ facturas.0.total_deuda|default:"0.00" }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card bg-dark border-secondary shadow-lg">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0">
+                <thead class="bg-black">
+                    <tr class="text-neon border-bottom border-success">
+                        <th>USUARIO / LECTOR</th> 
+                        <th>IDENTIFICACIÓN (CÉDULA)</th>
+                        <th>LIBROS CON RETRASO</th>
+                        <th>TOTAL A PAGAR</th>
+                        <th class="text-center">ACCIÓN</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for factura in facturas %}
+                    <tr>
+                        <td class="fw-bold text-white">
+                            <i class="bi bi-person-circle me-2 text-info"></i>
+                            {{ factura.prestamo__lector__user__username|upper }}
+                        </td>
+                        
+                        <td class="font-monospace text-info">{{ factura.prestamo__lector__identificacion }}</td>
+                        
+                        <td>
+                            <span class="badge rounded-pill bg-danger shadow-sm">
+                                <i class="bi bi-book me-1"></i> {{ factura.cantidad_libros }} pendiente(s)
+                            </span>
+                        </td>
+                        
+                        <td class="text-neon fw-bold fs-5">
+                            ${{ factura.total_deuda }}
+                        </td>
+                        
+                        <td class="text-center">
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-futuristic" onclick="window.print()">
+                                    <i class="bi bi-printer me-1"></i> RECIBO
+                                </button>
+                                <a href="{% url 'gestion:prestamos' %}?q={{ factura.prestamo__lector__identificacion }}" 
+                                   class="btn btn-sm btn-outline-info ms-2">
+                                    <i class="bi bi-eye"></i> VER DETALLE
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-5">
+                            <i class="bi bi-check2-circle fs-1 d-block mb-2 text-success"></i>
+                            No hay facturas pendientes de cobro en este momento.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
-<div class="table-responsive">
-    <table class="table table-dark table-hover border-success">
-        <thead>
-            <tr class="text-neon border-bottom border-success">
-                <th>Usuario (ID)</th> <th>Identificación (Cédula)</th>
-                <th>Libros Pendientes</th>
-                <th>Total a Pagar</th>
-                <th>Acción</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for factura in facturas %}
-            <tr>
-                <td class="fw-bold text-white">Lector #{{ factura.prestamo__lector__user_id }}</td>
-                
-                <td>{{ factura.prestamo__lector__identificacion }}</td>
-                
-                <td>
-                    <span class="badge rounded-pill bg-info text-dark">
-                        {{ factura.cantidad_libros }} libro(s) </span>
-                </td>
-                <td class="text-neon fw-bold">
-                    ${{ factura.total_deuda }} </td>
-                <td>
-                    <button class="btn btn-sm btn-futuristic" onclick="window.print()">
-                        <i class="bi bi-printer me-1"></i> Imprimir
-                    </button>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="5" class="text-center text-muted py-4">No hay facturas pendientes de cobro.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-
 <style>
-    /* Estilo para el botón futurista si no lo tienes */
+    /* Estilo Neón Principal */
+    .text-neon { 
+        color: #39ff14; 
+        text-shadow: 0 0 10px rgba(57, 255, 20, 0.5); 
+    }
+    
+    .border-success { border-color: #39ff14 !important; }
+
+    /* Botón Futurista */
     .btn-futuristic {
         background: transparent;
         color: #39ff14;
         border: 1px solid #39ff14;
         box-shadow: 0 0 5px #39ff14;
+        font-weight: bold;
+        transition: all 0.3s ease;
     }
+    
     .btn-futuristic:hover {
         background: #39ff14;
         color: #000;
         box-shadow: 0 0 20px #39ff14;
+        transform: scale(1.05);
+    }
+
+    /* Ajuste para impresión */
+    @media print {
+        .btn, form, .badge.bg-dark { display: none !important; }
+        body { background: white !important; color: black !important; }
+        .table { color: black !important; border: 1px solid #000 !important; }
+        .text-neon { color: black !important; text-shadow: none !important; }
     }
 </style>
 {% endblock %}

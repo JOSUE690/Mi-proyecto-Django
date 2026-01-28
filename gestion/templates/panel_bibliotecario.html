@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-4">
+    <h2 class="text-neon mb-4"><i class="bi bi-shield-lock me-2"></i>Panel de Control Bibliotecario</h2>
+    
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="main-content-card border-info text-center">
+                <h3 class="text-info">${{ total_multas }}</h3>
+                <p>Dinero Pendiente por Cobrar</p>
+                <a href="{% url 'gestion:multas' %}" class="btn btn-futuristic w-100">Ver Multas</a>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="main-content-card border-danger text-center">
+                <h3 class="text-danger">{{ vencidos_count }}</h3>
+                <p>Préstamos Vencidos Hoy</p>
+                <a href="{% url 'gestion:prestamos' %}" class="btn btn-outline-danger w-100">Revisar Retrasos</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

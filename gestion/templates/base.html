@@ -1,4 +1,5 @@
 {% load static %}
+{% load auth_extras %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -9,7 +10,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <style>
-        /* 1. Fondo principal y contenedores */
+        /* 1. Estilos Globales */
         body { 
             font-family: 'Inter', sans-serif; 
             background-color: #121212; 
@@ -20,7 +21,7 @@
             position: relative;
         }
 
-        /* 2. CONTENEDOR DE PARTÍCULAS */
+        /* 2. Fondo de Partículas */
         #particles-js {
             position: fixed;
             top: 0;
@@ -31,13 +32,13 @@
             z-index: 1;
         }
         
-        /* 3. Contenedor principal */
+        /* 3. Contenedor de Capas */
         .content-wrap {
             position: relative;
             z-index: 10; 
         }
 
-        /* 4. Navbar y acentos Neón */
+        /* 4. Navbar Neón */
         .navbar { 
             background-color: rgba(18, 18, 18, 0.95) !important; 
             box-shadow: 0 4px 12px rgba(0, 255, 136, 0.15); 
@@ -47,8 +48,12 @@
         .navbar-brand, .nav-link { color: #E0E0E0 !important; }
         .nav-link:hover { color: #00FF88 !important; } 
         .text-neon { color: #00FF88 !important; }
+        .text-warning-neon { 
+            color: #FFCC00 !important; 
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.6); 
+        }
         
-        /* 5. Hero (Cabecera) */
+        /* 5. Cabecera Hero */
         .hero { 
             background: linear-gradient(90deg, rgba(0,0,0,0.8), rgba(0, 255, 136, 0.1));
             height: 250px; 
@@ -63,20 +68,20 @@
             border-bottom: 2px solid #00FF88;
         }
         
-        /* 6. Estilo para el contenido principal */
+        /* 6. Card Central */
         .main-content-card {
-            background-color: #242424; 
+            background-color: #1e1e1e; 
             border-radius: 12px;
             padding: 30px;
-            box-shadow: 0 8px 30px rgba(0, 255, 136, 0.2);
-            border: 1px solid rgba(0, 255, 136, 0.3);
+            box-shadow: 0 8px 30px rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.2);
             margin-top: -50px; 
             position: relative;
             z-index: 20; 
             margin-bottom: 50px;
         }
         
-        /* 7. Botones neón */
+        /* Botones personalizados */
         .btn-futuristic {
             background: #00FF88;
             color: #121212;
@@ -98,42 +103,57 @@
         <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
             <div class="container">
                 <a class="navbar-brand fw-bold" href="{% url 'gestion:inicio' %}">
-                    <i class="bi bi-book-half text-neon me-2"></i>Biblioteca Josué
+                    <i class="bi bi-book-half text-neon me-2"></i>BIBLIOTECA JOSUÉ
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
                     <span class="navbar-toggler-icon"></span>
                 </button>
+
                 <div class="collapse navbar-collapse" id="menu">
-                    <ul class="navbar-nav ms-auto">
+                    <ul class="navbar-nav ms-auto align-items-center">
                         {% if user.is_authenticated %}
                             <li class="nav-item"><a class="nav-link" href="{% url 'gestion:inicio' %}">Inicio</a></li>
                             
-                            {% if user.is_superuser %}
-                                <li class="nav-item"><a class="nav-link" href="{% url 'gestion:libros' %}">Libros</a></li> 
-                                <li class="nav-item"><a class="nav-link" href="{% url 'gestion:autores' %}">Autores</a></li>
-                                <li class="nav-item"><a class="nav-link" href="{% url 'gestion:prestamos' %}">Préstamos</a></li>
-                                <li class="nav-item"><a class="nav-link" href="{% url 'gestion:multas' %}">Multas</a></li>
-                                <li class="nav-item"><a class="nav-link" href="{% url 'gestion:facturas' %}">Factura</a></li>
-                                <li class="nav-item"><a class="nav-link" href="{% url 'gestion:buscar_api' %}">Buscar Online</a></li>
-                            {% else %}
-                                <li class="nav-item"><a class="nav-link text-neon" href="{% url 'gestion:catalogo_lector' %}">Escoger Libros</a></li>
-                                <li class="nav-item"><a class="nav-link" href="{% url 'gestion:multas' %}">Mis Multas</a></li>
+                            {% if user|has_group:"Bodegero" %}
+                            <li class="nav-item">
+                                <a class="nav-link text-warning-neon fw-bold border border-warning rounded px-2 ms-lg-2" href="{% url 'gestion:inventario_bodega' %}">
+                                    <i class="bi bi-box-seam me-1"></i> MI BODEGA
+                                </a>
+                            </li>
                             {% endif %}
-                            
+
+                            {% if user|has_group:"Bibliotecarios" or user.is_superuser %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-neon fw-bold" href="#" id="dropBiblio" role="button" data-bs-toggle="dropdown">
+                                    Gestión
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-dark border-success shadow-lg">
+                                    <li><a class="dropdown-item" href="{% url 'gestion:libros' %}"><i class="bi bi-journal-text me-2"></i>Libros</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'gestion:autores' %}"><i class="bi bi-person-badge me-2"></i>Autores</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'gestion:prestamos' %}"><i class="bi bi-calendar-check me-2"></i>Préstamos</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'gestion:multas' %}"><i class="bi bi-currency-dollar me-2"></i>Multas</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'gestion:lectores' %}"><i class="bi bi-people me-2"></i>Lectores</a></li>
+                                    <li><hr class="dropdown-divider bg-success"></li>
+                                    <li><a class="dropdown-item" href="{% url 'gestion:buscar_api' %}"><i class="bi bi-cloud-download me-2"></i>Importar ISBN</a></li>
+                                </ul>
+                            </li>
+                            {% endif %}
+
+                            <li class="nav-item"><a class="nav-link" href="{% url 'gestion:catalogo_lector' %}">Catálogo</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'gestion:mis_prestamos' %}">Mis Libros</a></li>
+
                             <li class="nav-item ms-lg-3">
-                                <a class="nav-link text-danger fw-bold" href="{% url 'gestion:salir' %}">
-                                    <i class="bi bi-box-arrow-right"></i> Salir ({{ user.username }})
+                                <a class="btn btn-outline-danger btn-sm fw-bold" href="{% url 'gestion:salir' %}">
+                                    <i class="bi bi-power me-1"></i> {{ user.username }}
                                 </a>
                             </li>
                         {% else %}
                             <li class="nav-item">
-                                <a class="nav-link text-neon fw-bold" href="{% url 'gestion:ingresar' %}">
-                                    <i class="bi bi-person-circle"></i> Iniciar Sesión
+                                <a class="btn btn-futuristic btn-sm px-4" href="{% url 'gestion:ingresar' %}">
+                                    INICIAR SESIÓN
                                 </a>
                             </li>
                         {% endif %}
-                        
-                        <li class="nav-item"><a class="nav-link opacity-50" href="/admin/">Admin Django</a></li>
                     </ul>
                 </div>
             </div>
@@ -141,12 +161,21 @@
 
         <div class="hero text-center">
             <div class="hero-content">
-                <h1 class="display-3 fw-bold">Sistema de Biblioteca</h1>
-                {% if user.is_authenticated %}
-                    <p class="lead text-neon">Bienvenido de nuevo, <span class="text-white">{{ user.username }}</span></p>
-                {% else %}
-                    <p class="lead text-neon">Tecnología de punta para la administración de recursos</p>
-                {% endif %}
+                <h1 class="display-4 fw-bold mb-0">SISTEMA BIBLIOTECARIO</h1>
+                <div class="mt-2">
+                    {% if user.is_authenticated %}
+                        <span class="badge bg-dark border border-neon text-neon px-3 py-2">
+                            ACCESO: 
+                            {% if user.is_superuser %} ADMIN RED
+                            {% elif user|has_group:"Bodegero" %} BODEGA (JOSUÉ)
+                            {% elif user|has_group:"Bibliotecarios" %} GESTIÓN
+                            {% else %} LECTOR
+                            {% endif %}
+                        </span>
+                    {% else %}
+                        <p class="text-neon opacity-75">Panel de Control de Recursos Digitales</p>
+                    {% endif %}
+                </div>
             </div>
         </div>
 
@@ -162,41 +191,19 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
     
     <script>
+        /* Configuración de fondo de partículas */
         particlesJS('particles-js', {
             "particles": {
-                "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
+                "number": { "value": 60, "density": { "enable": true, "value_area": 800 } },
                 "color": { "value": "#00FF88" },
                 "shape": { "type": "circle" },
-                "opacity": { "value": 0.5, "random": false, "anim": { "enable": false } },
-                "size": { "value": 3, "random": true, "anim": { "enable": false } },
-                "line_linked": {
-                    "enable": true,
-                    "distance": 150,
-                    "color": "#00E070",
-                    "opacity": 0.4,
-                    "width": 1
-                },
-                "move": {
-                    "enable": true,
-                    "speed": 2,
-                    "direction": "none",
-                    "random": false,
-                    "straight": false,
-                    "out_mode": "out",
-                    "bounce": false
-                }
+                "opacity": { "value": 0.3 },
+                "size": { "value": 2, "random": true },
+                "line_linked": { "enable": true, "distance": 150, "color": "#00FF88", "opacity": 0.2, "width": 1 },
+                "move": { "enable": true, "speed": 1.5, "direction": "none", "out_mode": "out" }
             },
             "interactivity": {
-                "detect_on": "canvas",
-                "events": {
-                    "onhover": { "enable": true, "mode": "grab" },
-                    "onclick": { "enable": true, "mode": "push" },
-                    "resize": true
-                },
-                "modes": {
-                    "grab": { "distance": 140, "line_linked": { "opacity": 1 } },
-                    "push": { "particles_nb": 4 }
-                }
+                "events": { "onhover": { "enable": true, "mode": "grab" } }
             },
             "retina_detect": true
         });
